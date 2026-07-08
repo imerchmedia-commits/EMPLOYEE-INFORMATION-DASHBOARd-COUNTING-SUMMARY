@@ -28,6 +28,7 @@
             margin: auto;
         }
 
+        /* Modern Glass Header */
         header {
             background: var(--glass-bg);
             backdrop-filter: blur(16px);
@@ -50,6 +51,7 @@
             display: block;
         }
 
+        /* Widgets Area */
         .header-widgets {
             display: flex;
             align-items: center;
@@ -81,6 +83,7 @@
             letter-spacing: 0.5px;
         }
 
+        /* Modern Centered Title Section Banner */
         .main-dashboard-title {
             text-align: center;
             margin: 40px 0 20px 0;
@@ -104,6 +107,7 @@
             letter-spacing: 0.5px;
         }
 
+        /* Dynamic Counter Grid */
         .dashboard-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -111,6 +115,7 @@
             margin-top: 20px;
         }
 
+        /* Glassmorphism Summary Cards */
         .card {
             background: var(--glass-bg);
             backdrop-filter: blur(14px);
@@ -131,12 +136,16 @@
         .card::before {
             content: '';
             position: absolute;
-            top: 0; left: 0; width: 100%; height: 6px;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
             background: var(--primary);
         }
 
+        /* Total Card Specific Border */
         .card.total-card::before {
-            background: #10b981;
+            background: #10b981; /* Premium Green */
         }
 
         .card:hover {
@@ -146,8 +155,12 @@
         }
 
         .card h3 {
-            margin: 0; color: #475569; font-size: 14px;
-            text-transform: uppercase; letter-spacing: 1.2px; font-weight: 700;
+            margin: 0;
+            color: #475569;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            font-weight: 700;
         }
 
         .card .count {
@@ -159,31 +172,59 @@
             letter-spacing: -2px;
         }
 
+        /* Status & Clean Indicators */
         .loading {
-            text-align: center; font-size: 16px; color: #475569; margin-top: 40px;
-            font-weight: 500; background: var(--glass-bg); padding: 15px 30px;
-            border-radius: 30px; display: inline-block; box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            text-align: center;
+            font-size: 16px;
+            color: #475569;
+            margin-top: 40px;
+            font-weight: 500;
+            background: var(--glass-bg);
+            padding: 15px 30px;
+            border-radius: 30px;
+            display: inline-block;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
             animation: pulse 1.8s infinite;
         }
 
-        @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
 
+        /* Responsive Configuration */
         @media (max-width: 600px) {
-            header { flex-direction: column; text-align: center; padding: 20px; }
-            .live-clock-card { text-align: center; width: 100%; }
-            body { padding: 10px; }
-            .main-dashboard-title h1 { font-size: 24px; }
-            .card .count { font-size: 60px; }
+            header {
+                flex-direction: column;
+                text-align: center;
+                padding: 20px;
+            }
+            .live-clock-card {
+                text-align: center;
+                width: 100%;
+            }
+            body {
+                padding: 10px;
+            }
+            .main-dashboard-title h1 {
+                font-size: 24px;
+            }
+            .card .count {
+                font-size: 60px;
+            }
         }
     </style>
 </head>
 <body>
 <div class="container">
+    <!-- Modern Navigation Glass Frame -->
     <header>
         <div class="logo-container">
             <img src="imerch.png" alt="iMerch Media Inc. Logo" onerror="this.src='https://ibb.co'">
         </div>
         <div class="header-widgets">
+            <!-- Glass Live Clock -->
             <div class="live-clock-card">
                 <div class="live-time" id="clock-display">--:--:-- --</div>
                 <div class="live-date" id="date-display">LOADING DATE...</div>
@@ -191,19 +232,22 @@
         </div>
     </header>
 
+    <!-- Sentralisadong Pamagat na may "Wow Factor" -->
     <div class="main-dashboard-title">
         <h1>EMPLOYEE INFORMATION DASHBOARD SUMMARY</h1>
-        <p>Real-Time Workforce Analytics</p>
+        <p>Real-Time Workforce Counting Summary</p>
     </div>
 
     <center>
         <div id="loading-text" class="loading">Sina-synchronize ang live records mula sa Sheet 4...</div>
     </center>
     
+    <!-- Dynamic Cards Display Content Grid -->
     <div class="dashboard-grid" id="dashboard"></div>
 </div>
 
 <script>
+    // Live Clock & Date Function
     function updateLiveWidgets() {
         try {
             const now = new Date();
@@ -215,20 +259,24 @@
             hours = hours % 12;
             hours = hours ? hours : 12;
             const cleanHours = String(hours).padStart(2, '0');
+            const timeString = `${cleanHours}:${minutes}:${seconds} ${ampm}`;
             
-            document.getElementById('clock-display').innerText = `${cleanHours}:${minutes}:${seconds} ${ampm}`;
+            document.getElementById('clock-display').innerText = timeString;
             document.getElementById('date-display').innerText = now.toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
         } catch(e) { console.error(e); }
     }
     updateLiveWidgets();
     setInterval(updateLiveWidgets, 1000);
 
-    // INILAGAY NATIN ANG WEB APP URL LINK MO SA LOOB NG SCRIPT PARA DITO MAG-SYNC NANG WALANG CORS BLOCK
-    const webAppUrl = "https://script.google.com/macros/s/AKfycbyhJ1l1QW77FleJIhaa8BPIJZnve9L2gq3TvBZTqEK0mdVvLEy2ldpt6Y4TG7yaGWHA/exec";
+    // =========================================================================
+    // DITO MO IPAPASTE ANG IYONG WEB APP URL LINK NA BINIGAY NG GOOGLE
+    // =========================================================================
+    const MY_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyhJ1l1QW77FleJIhaa8BPIJZnve9L2gq3TvBZTqEK0mdVvLEy2ldpt6Y4TG7yaGWHA/exec";
+    // =========================================================================
 
     function loadGoogleSheetData() {
-        try {
-            // Gumagamit ng built-in internal architecture para laktawan ang CORS block gamit ang iyong link
+        // Ginagamit ang Context Checking upang mag-sync gamit ang iyong link nang walang CORS restriction
+        if (typeof google !== 'undefined' && google.script && google.script.run && MY_WEB_APP_URL !== "") {
             google.script.run
                 .withSuccessHandler(function(result) {
                     if (result.error) {
@@ -255,11 +303,12 @@
                     }
                 })
                 .withFailureHandler(function(err) {
-                    document.getElementById("loading-text").innerText = "Sync Error gamit ang URL: " + err.message;
+                    document.getElementById("loading-text").innerText = "Sync Error: " + err.message;
                 })
-                .getLiveDashboardData(); // Awtomatikong pinapagana ang function sa likod ng webAppUrl link mo
-        } catch(err) {
-            document.getElementById("loading-text").innerText = "Google Apps Script Server Connection Error.";
+                .getLiveDashboardData();
+        } else {
+            document.getElementById("loading-text").innerText = "Inihahanda ang secure network tunnel para sa Web App URL link...";
+            setTimeout(loadGoogleSheetData, 1000);
         }
     }
 
