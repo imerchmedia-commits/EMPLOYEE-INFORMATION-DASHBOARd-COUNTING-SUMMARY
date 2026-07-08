@@ -219,7 +219,6 @@
     <!-- Modern Navigation Glass Frame -->
     <header>
         <div class="logo-container">
-            <!-- Ginamit ang iyong uploaded official iMerch Logo -->
             <img src="imerch.png" alt="iMerch Media Inc. Logo" onerror="this.src='https://ibb.co'">
         </div>
         <div class="header-widgets">
@@ -248,63 +247,83 @@
 <script>
     // Live Clock & Date Function (Inilabas para gumana agad kahit naglo-load pa ang Google Sheets)
     function updateLiveWidgets() {
-        const now = new Date();
-        
-        // Time parameters setup (Realistic 12-hour format)
-        let hours = now.getHours();
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-        const seconds = String(now.getSeconds()).padStart(2, '0');
-        const ampm = hours >= 12 ? 'PM' : 'AM';
-        
-        hours = hours % 12;
-        hours = hours ? hours : 12; // Ang '0' ay gagawing '12'
-        const cleanHours = String(hours).padStart(2, '0');
-        const timeString = `${cleanHours}:${minutes}:${seconds} ${ampm}`;
-        
-        // Date parameters setup
-        const options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
-        const dateString = now.toLocaleDateString('en-US', options);
-        
-        document.getElementById('clock-display').innerText = timeString;
-        document.getElementById('date-display').innerText = dateString;
+        try {
+            const now = new Date();
+            
+            // Time parameters setup (Realistic 12-hour format)
+            let hours = now.getHours();
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            
+            hours = hours % 12;
+            hours = hours ? hours : 12; // Ang '0' ay gagawing '12'
+            const cleanHours = String(hours).padStart(2, '0');
+            const timeString = `${cleanHours}:${minutes}:${seconds} ${ampm}`;
+            
+            // Date parameters setup
+            const options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
+            const dateString = now.toLocaleDateString('en-US', options);
+            
+            document.getElementById('clock-display').innerText = timeString;
+            document.getElementById('date-display').innerText = dateString;
+        } catch(e) {
+            console.error("Clock widget parsing error: ", e);
+        }
     }
     
-    // Agarang patakbuhin ang relo tuwing 1 segundo
+    // Agarang patakbuhin ang ticking loops ng orasan bawat 1 segundo
     updateLiveWidgets();
     setInterval(updateLiveWidgets, 1000);
 
-    // Direct Google Sheet Published Link (Sheet 4 configuration)
-    const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSirPBxOcmJe8NSl7fqO4SIG8alO_80cp-5gRYIpM3ogzDvWYEKNTdXGHiwkCb0bVsg4J-uVA24gCFa/pub?gid=528581335&single=true&output=csv";
-
-    async function fetchDashboardData() {
+    // Secure Data Extraction directly accessing Apps Script matrix
+    function loadGoogleSheetData() {
         try {
-            const response = await fetch(csvUrl);
-            const data = await response.text();
-            
-            // Paghiwalayin ang hanay at mga linya ng CSV raw matrix
-            const rows = data.split("\n").map(row => {
-                return row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-            });
-            
-            // Paalala: Index 1 = Column B (Baguhin kung nasa ibang column ang kategorya mo)
-            const targetColumnIndex = 1; 
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    if (result.error) {
+                        document.getElementById("loading-text").innerText = result.error;
+                        return;
+                    }
 
-            let totalEmployees = 0;
-            let counts = {};
+                    // Itago ang temporary loading alert tab
+                    document.getElementById("loading-text").style.display = "none";
+                    const dashboard = document.getElementById("dashboard");
+                    dashboard.innerHTML = ""; 
 
-            // Magsimula sa index 1 para laging lampasan ang header titles
-            for (let i = 1; i < rows.length; i++) {
-                if (rows[i] && rows[i].length > targetColumnIndex && rows[i][targetColumnIndex].trim() !== "") {
-                    let value = rows[i][targetColumnIndex].trim().replace(/^"|"$/g, "").trim();
-                    totalEmployees++;
-                    counts[value] = (counts[value] || 0) + 1;
-                }
-            }
+                    // Green Counter Panel for Total Workforce Core count
+                    dashboard.innerHTML += `
+                        <div class="card total-card">
+                            <h3>Total Employees</h3>
+                            <div class="count">${result.total}</div>
+                        </div>
+                    `;
 
-            // Itago ang processing label
-            document.getElementById("loading-text").style.display = "none";
-            
-            const dashboard = document.getElementById("dashboard");
-            dashboard.innerHTML = ""; // Alisin ang nakaraang lumang estado ng cache
+                    // Generation loops for dynamic categories cards
+                    for (const [key, groupCount] of Object.entries(result.breakdown)) {
+                        dashboard.innerHTML += `
+                            <div class="card">
+                                <h3>${key}</h3>
+                                <div class="count">${groupCount}</div>
+                            </div>
+                        `;
+                    }
+                })
+                .withFailureHandler(function(err) {
+                    document.getElementById("loading-text").innerText = "Error: " + err.message;
+                })
+                .getLiveDashboardData(); // Tinatawag ang custom structure mula sa Code.gs
+        } catch(err) {
+            document.getElementById("loading-text").innerText = "Hindi nagawang simulan ang Google Runtime endpoint interface.";
+        }
+    }
 
-            // Pangunahing Premium Green Card para sa Lahat ng Empleyado
+    // Force engine integration initialization on DOM configuration ready state
+    window.addEventListener('DOMContentLoaded', function() {
+        loadGoogleSheetData();
+        // Awtomatikong magre-refresh kada 30 segundo nang walang interruption
+        setInterval(loadGoogleSheetData, 30000);
+    });
+</script>
+</body>
+</html>
