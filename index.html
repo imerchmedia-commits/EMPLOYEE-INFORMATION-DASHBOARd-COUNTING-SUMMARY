@@ -83,12 +83,36 @@
             letter-spacing: 0.5px;
         }
 
+        /* Modern Centered Title Section Banner */
+        .main-dashboard-title {
+            text-align: center;
+            margin: 40px 0 20px 0;
+        }
+
+        .main-dashboard-title h1 {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--dark);
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            text-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .main-dashboard-title p {
+            font-size: 14px;
+            color: #475569;
+            margin: 8px 0 0 0;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
         /* Dynamic Counter Grid */
         .dashboard-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
             gap: 24px;
-            margin-top: 10px;
+            margin-top: 20px;
         }
 
         /* Glassmorphism Summary Cards */
@@ -153,7 +177,7 @@
             text-align: center;
             font-size: 16px;
             color: #475569;
-            margin-top: 60px;
+            margin-top: 40px;
             font-weight: 500;
             background: var(--glass-bg);
             padding: 15px 30px;
@@ -183,6 +207,9 @@
             body {
                 padding: 10px;
             }
+            .main-dashboard-title h1 {
+                font-size: 24px;
+            }
         }
     </style>
 </head>
@@ -193,16 +220,22 @@
     <header>
         <div class="logo-container">
             <!-- Ginamit ang iyong uploaded official iMerch Logo -->
-            <img src="imerch.png" alt="iMerch Media Inc. Logo" onerror="this.src='https://placeholder.com'">
+            <img src="imerch.png" alt="iMerch Media Inc. Logo" onerror="this.src='https://ibb.co'">
         </div>
         <div class="header-widgets">
             <!-- Glass Live Clock -->
             <div class="live-clock-card">
-                <div class="live-time" id="clock-display">00:00:00 AM</div>
+                <div class="live-time" id="clock-display">--:--:-- --</div>
                 <div class="live-date" id="date-display">LOADING DATE...</div>
             </div>
         </div>
     </header>
+
+    <!-- Sentralisadong Pamagat na may "Wow Factor" -->
+    <div class="main-dashboard-title">
+        <h1>Employee Information Dashboard</h1>
+        <p>Real-Time Workforce Counting Summary</p>
+    </div>
 
     <center>
         <div id="loading-text" class="loading">Sina-synchronize ang live records mula sa Google Sheets...</div>
@@ -213,11 +246,11 @@
 </div>
 
 <script>
-    // Live Clock & Date Function (12-Hour System Configuration)
+    // Live Clock & Date Function (Inilabas para gumana agad kahit naglo-load pa ang Google Sheets)
     function updateLiveWidgets() {
         const now = new Date();
         
-        // Time parameters setup
+        // Time parameters setup (Realistic 12-hour format)
         let hours = now.getHours();
         const minutes = String(now.getMinutes()).padStart(2, '0');
         const seconds = String(now.getSeconds()).padStart(2, '0');
@@ -225,7 +258,8 @@
         
         hours = hours % 12;
         hours = hours ? hours : 12; // Ang '0' ay gagawing '12'
-        const timeString = `${hours}:${minutes}:${seconds} ${ampm}`;
+        const cleanHours = String(hours).padStart(2, '0');
+        const timeString = `${cleanHours}:${minutes}:${seconds} ${ampm}`;
         
         // Date parameters setup
         const options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
@@ -234,9 +268,10 @@
         document.getElementById('clock-display').innerText = timeString;
         document.getElementById('date-display').innerText = dateString;
     }
-    // Patakbuhin ang relo bawat segundo
-    setInterval(updateLiveWidgets, 1000);
+    
+    // Agarang patakbuhin ang relo tuwing 1 segundo
     updateLiveWidgets();
+    setInterval(updateLiveWidgets, 1000);
 
     // Direct Google Sheet Published Link (Sheet 4 configuration)
     const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSirPBxOcmJe8NSl7fqO4SIG8alO_80cp-5gRYIpM3ogzDvWYEKNTdXGHiwkCb0bVsg4J-uVA24gCFa/pub?gid=528581335&single=true&output=csv";
@@ -248,12 +283,10 @@
             
             // Paghiwalayin ang hanay at mga linya ng CSV raw matrix
             const rows = data.split("\n").map(row => {
-                // Maingat na hinahati kahit may kuwit sa loob ng cells
                 return row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
             });
             
-            // Paalala: Baguhin ang index na ito depende kung aling column ang iyong bibilangin
-            // (0 = Column A, 1 = Column B, 2 = Column C...)
+            // Paalala: Index 1 = Column B (Baguhin kung nasa ibang column ang kategorya mo)
             const targetColumnIndex = 1; 
 
             let totalEmployees = 0;
@@ -275,27 +308,3 @@
             dashboard.innerHTML = ""; // Alisin ang nakaraang lumang estado ng cache
 
             // Pangunahing Premium Green Card para sa Lahat ng Empleyado
-            dashboard.innerHTML += `
-                <div class="card total-card">
-                    <h3>Total Employees</h3>
-                    <div class="count">${totalEmployees}</div>
-                </div>
-            `;
-
-            // Awtomatikong paglikha ng magkakahiwalay na card para sa bawat dynamic group value
-            for (const [key, groupCount] of Object.entries(counts)) {
-                dashboard.innerHTML += `
-                    <div class="card">
-                        <h3>${key}</h3>
-                        <div class="count">${groupCount}</div>
-                    </div>
-                `;
-            }
-
-        } catch (error) {
-            document.getElementById("loading-text").innerText = "Nagkaroon ng aberya sa koneksyon. Pakisuri ang network setting.";
-            console.error(error);
-        }
-    }
-
-    // Unang pag-load ng data matrix mula sa cloud
