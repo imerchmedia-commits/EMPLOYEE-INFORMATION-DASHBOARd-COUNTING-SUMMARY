@@ -215,24 +215,38 @@
     updateLiveWidgets();
     setInterval(updateLiveWidgets, 1000);
 
-    // ETOMISMO ANG WEB APP URL LINK MO NA NAKA-ENGRAVE SA LOOB NG CODE
-    const webAppUrl = "https://script.google.com/macros/s/AKfycbyW7TOBzxj2Z5zidvrVtgS4l7VAv6DugwaAuo0JWFBiou7TOn_i0p0esG6TLIQYbw/exec";
+    // DAHIL SA CORS, GAGAMIT TAYO NG PUBLIC SPREADSHEET JSON ENDPOINT MULA SA SHEET 4 MO
+    const publicSpreadsheetUrl = "https://script.google.com/macros/s/AKfycbyW7TOBzxj2Z5zidvrVtgS4l7VAv6DugwaAuo0JWFBiou7TOn_i0p0esG6TLIQYbw/exec";
 
     async function loadGoogleSheetData() {
         try {
-            // Tumatawag sa sheet gamit ang iyong mismong URL Link
-            const response = await fetch(webAppUrl, { method: 'POST' });
-            const result = await response.json();
+            // Babasahin natin ito bilang text matrix para i-bypass ang CORS ng macros link
+            const response = await fetch(publicSpreadsheetUrl);
+            const data = await response.text();
+            
+            const rows = data.split("\n").map(row => row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/));
+            const targetColumnIndex = 1; // Column B
+
+            let totalEmployees = 0;
+            let counts = {};
+
+            for (let i = 1; i < rows.length; i++) {
+                if (rows[i] && rows[i].length > targetColumnIndex && rows[i][targetColumnIndex].trim() !== "") {
+                    let value = rows[i][targetColumnIndex].trim().replace(/^"|"$/g, "").trim();
+                    totalEmployees++;
+                    counts[value] = (counts[value] || 0) + 1;
+                }
+            }
 
             document.getElementById("loading-text").style.display = "none";
             const dashboard = document.getElementById("dashboard");
             dashboard.innerHTML = `
                 <div class="card total-card">
                     <h3>Total Employees</h3>
-                    <div class="count">${result.total}</div>
+                    <div class="count">${totalEmployees}</div>
                 </div>
             `;
-            for (const [key, groupCount] of Object.entries(result.breakdown)) {
+            for (const [key, groupCount] of Object.entries(counts)) {
                 dashboard.innerHTML += `
                     <div class="card">
                         <h3>${key}</h3>
@@ -241,7 +255,7 @@
                 `;
             }
         } catch (err) {
-            document.getElementById("loading-text").innerText = "Sync Error gamit ang URL: " + err.message;
+            document.getElementById("loading-text").innerText = "GitHub Sync Error: " + err.message;
         }
     }
 
@@ -252,4 +266,3 @@
 </script>
 </body>
 </html>
-
