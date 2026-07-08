@@ -28,7 +28,6 @@
             margin: auto;
         }
 
-        /* Modern Glass Header */
         header {
             background: var(--glass-bg);
             backdrop-filter: blur(16px);
@@ -51,7 +50,6 @@
             display: block;
         }
 
-        /* Widgets Area */
         .header-widgets {
             display: flex;
             align-items: center;
@@ -83,7 +81,6 @@
             letter-spacing: 0.5px;
         }
 
-        /* Modern Centered Title Section Banner */
         .main-dashboard-title {
             text-align: center;
             margin: 40px 0 20px 0;
@@ -107,7 +104,6 @@
             letter-spacing: 0.5px;
         }
 
-        /* Dynamic Counter Grid */
         .dashboard-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -115,7 +111,6 @@
             margin-top: 20px;
         }
 
-        /* Glassmorphism Summary Cards */
         .card {
             background: var(--glass-bg);
             backdrop-filter: blur(14px);
@@ -136,16 +131,12 @@
         .card::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 6px;
+            top: 0; left: 0; width: 100%; height: 6px;
             background: var(--primary);
         }
 
-        /* Total Card Specific Border */
         .card.total-card::before {
-            background: #10b981; /* Premium Green */
+            background: #10b981;
         }
 
         .card:hover {
@@ -155,75 +146,39 @@
         }
 
         .card h3 {
-            margin: 0;
-            color: #475569;
-            font-size: 13px;
-            text-transform: uppercase;
-            letter-spacing: 1.2px;
-            font-weight: 700;
+            margin: 0; color: #475569; font-size: 13px;
+            text-transform: uppercase; letter-spacing: 1.2px; font-weight: 700;
         }
 
         .card .count {
-            font-size: 46px;
-            font-weight: 800;
-            color: var(--dark);
-            margin-top: 12px;
-            line-height: 1;
-            letter-spacing: -1px;
+            font-size: 46px; font-weight: 800; color: var(--dark);
+            margin-top: 12px; line-height: 1; letter-spacing: -1px;
         }
 
-        /* Status & Clean Indicators */
         .loading {
-            text-align: center;
-            font-size: 16px;
-            color: #475569;
-            margin-top: 40px;
-            font-weight: 500;
-            background: var(--glass-bg);
-            padding: 15px 30px;
-            border-radius: 30px;
-            display: inline-block;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            text-align: center; font-size: 16px; color: #475569; margin-top: 40px;
+            font-weight: 500; background: var(--glass-bg); padding: 15px 30px;
+            border-radius: 30px; display: inline-block; box-shadow: 0 4px 12px rgba(0,0,0,0.03);
             animation: pulse 1.8s infinite;
         }
 
-        @keyframes pulse {
-            0% { opacity: 0.6; }
-            50% { opacity: 1; }
-            100% { opacity: 0.6; }
-        }
+        @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
 
-        /* Responsive Configuration */
         @media (max-width: 600px) {
-            header {
-                flex-direction: column;
-                text-align: center;
-                padding: 20px;
-            }
-            .live-clock-card {
-                text-align: center;
-                width: 100%;
-            }
-            body {
-                padding: 10px;
-            }
-            .main-dashboard-title h1 {
-                font-size: 24px;
-            }
+            header { flex-direction: column; text-align: center; padding: 20px; }
+            .live-clock-card { text-align: center; width: 100%; }
+            body { padding: 10px; }
+            .main-dashboard-title h1 { font-size: 24px; }
         }
     </style>
 </head>
 <body>
-
 <div class="container">
-    <!-- Modern Navigation Glass Frame -->
     <header>
         <div class="logo-container">
-            <!-- Nilagyan natin ng solid online fallback link para siguradong laging kita ang logo -->
             <img src="imerch.png" alt="iMerch Media Inc. Logo" onerror="this.src='https://ibb.co'">
         </div>
         <div class="header-widgets">
-            <!-- Glass Live Clock -->
             <div class="live-clock-card">
                 <div class="live-time" id="clock-display">--:--:-- --</div>
                 <div class="live-date" id="date-display">LOADING DATE...</div>
@@ -231,7 +186,6 @@
         </div>
     </header>
 
-    <!-- Sentralisadong Pamagat na may "Wow Factor" -->
     <div class="main-dashboard-title">
         <h1>Employee Information Dashboard</h1>
         <p>Real-Time Workforce Counting Summary</p>
@@ -241,88 +195,63 @@
         <div id="loading-text" class="loading">Sina-synchronize ang live records mula sa Google Sheets...</div>
     </center>
     
-    <!-- Dynamic Cards Display Content Grid -->
     <div class="dashboard-grid" id="dashboard"></div>
 </div>
 
 <script>
-    // Live Clock & Date Function
     function updateLiveWidgets() {
         try {
             const now = new Date();
-            
-            // Time parameters setup (Realistic 12-hour format)
             let hours = now.getHours();
             const minutes = String(now.getMinutes()).padStart(2, '0');
             const seconds = String(now.getSeconds()).padStart(2, '0');
             const ampm = hours >= 12 ? 'PM' : 'AM';
             
             hours = hours % 12;
-            hours = hours ? hours : 12; // Ang '0' ay gagawing '12'
+            hours = hours ? hours : 12;
             const cleanHours = String(hours).padStart(2, '0');
-            const timeString = `${cleanHours}:${minutes}:${seconds} ${ampm}`;
             
-            // Date parameters setup
-            const options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
-            const dateString = now.toLocaleDateString('en-US', options);
-            
-            document.getElementById('clock-display').innerText = timeString;
-            document.getElementById('date-display').innerText = dateString;
+            document.getElementById('clock-display').innerText = `${cleanHours}:${minutes}:${seconds} ${ampm}`;
+            document.getElementById('date-display').innerText = now.toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
         } catch(e) {
-            console.error("Clock widget error: ", e);
+            console.error(e);
         }
     }
-    
-    // Agarang patakbuhin ang ticking loops ng orasan bawat 1 segundo
     updateLiveWidgets();
     setInterval(updateLiveWidgets, 1000);
 
-    // Dito kinukuha ang data mula sa iyong Code.gs nang direkta at ligtas
     function loadGoogleSheetData() {
-        try {
-            google.script.run
-                .withSuccessHandler(function(result) {
-                    if (result.error) {
-                        document.getElementById("loading-text").innerText = result.error;
-                        return;
-                    }
-
-                    // Itago ang temporary loading alert tab
-                    document.getElementById("loading-text").style.display = "none";
-                    const dashboard = document.getElementById("dashboard");
-                    dashboard.innerHTML = ""; 
-
-                    // Green Counter Panel for Total Workforce Core count
+        google.script.run
+            .withSuccessHandler(function(result) {
+                if (result.error) {
+                    document.getElementById("loading-text").innerText = result.error;
+                    return;
+                }
+                document.getElementById("loading-text").style.display = "none";
+                const dashboard = document.getElementById("dashboard");
+                dashboard.innerHTML = `
+                    <div class="card total-card">
+                        <h3>Total Employees</h3>
+                        <div class="count">${result.total}</div>
+                    </div>
+                `;
+                for (const [key, groupCount] of Object.entries(result.breakdown)) {
                     dashboard.innerHTML += `
-                        <div class="card total-card">
-                            <h3>Total Employees</h3>
-                            <div class="count">${result.total}</div>
+                        <div class="card">
+                            <h3>${key}</h3>
+                            <div class="count">${groupCount}</div>
                         </div>
                     `;
-
-                    // Generation loops for dynamic categories cards
-                    for (const [key, groupCount] of Object.entries(result.breakdown)) {
-                        dashboard.innerHTML += `
-                            <div class="card">
-                                <h3>${key}</h3>
-                                <div class="count">${groupCount}</div>
-                            </div>
-                        `;
-                    }
-                })
-                .withFailureHandler(function(err) {
-                    document.getElementById("loading-text").innerText = "Error: " + err.message;
-                })
-                .getLiveDashboardData(); // Tinatawag ang function sa Code.gs
-        } catch(err) {
-            document.getElementById("loading-text").innerText = "Hindi nagawang ikonekta ang Google Script infrastructure.";
-        }
+                }
+            })
+            .withFailureHandler(function(err) {
+                document.getElementById("loading-text").innerText = "Sync Error: " + err.message;
+            })
+            .getLiveDashboardData();
     }
 
-    // Siguraduhing unahang i-render ang ticking clock bago tawagin ang Google Sheet data
     window.addEventListener('DOMContentLoaded', function() {
         loadGoogleSheetData();
-        // Awtomatikong magre-refresh kada 30 segundo nang walang interruption
         setInterval(loadGoogleSheetData, 30000);
     });
 </script>
