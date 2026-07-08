@@ -206,48 +206,43 @@
             const minutes = String(now.getMinutes()).padStart(2, '0');
             const seconds = String(now.getSeconds()).padStart(2, '0');
             const ampm = hours >= 12 ? 'PM' : 'AM';
-            
             hours = hours % 12;
             hours = hours ? hours : 12;
-            const cleanHours = String(hours).padStart(2, '0');
-            
-            document.getElementById('clock-display').innerText = `${cleanHours}:${minutes}:${seconds} ${ampm}`;
+            document.getElementById('clock-display').innerText = `${String(hours).padStart(2, '0')}:${minutes}:${seconds} ${ampm}`;
             document.getElementById('date-display').innerText = now.toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
-        } catch(e) {
-            console.error(e);
-        }
+        } catch(e) { console.error(e); }
     }
     updateLiveWidgets();
     setInterval(updateLiveWidgets, 1000);
 
-    function loadGoogleSheetData() {
-        google.script.run
-            .withSuccessHandler(function(result) {
-                if (result.error) {
-                    document.getElementById("loading-text").innerText = result.error;
-                    return;
-                }
-                document.getElementById("loading-text").style.display = "none";
-                const dashboard = document.getElementById("dashboard");
-                dashboard.innerHTML = `
-                    <div class="card total-card">
-                        <h3>Total Employees</h3>
-                        <div class="count">${result.total}</div>
+    // ETOMISMO ANG WEB APP URL LINK MO NA NAKA-ENGRAVE SA LOOB NG CODE
+    const webAppUrl = "https://script.google.com/macros/s/AKfycbyW7TOBzxj2Z5zidvrVtgS4l7VAv6DugwaAuo0JWFBiou7TOn_i0p0esG6TLIQYbw/exec";
+
+    async function loadGoogleSheetData() {
+        try {
+            // Tumatawag sa sheet gamit ang iyong mismong URL Link
+            const response = await fetch(webAppUrl, { method: 'POST' });
+            const result = await response.json();
+
+            document.getElementById("loading-text").style.display = "none";
+            const dashboard = document.getElementById("dashboard");
+            dashboard.innerHTML = `
+                <div class="card total-card">
+                    <h3>Total Employees</h3>
+                    <div class="count">${result.total}</div>
+                </div>
+            `;
+            for (const [key, groupCount] of Object.entries(result.breakdown)) {
+                dashboard.innerHTML += `
+                    <div class="card">
+                        <h3>${key}</h3>
+                        <div class="count">${groupCount}</div>
                     </div>
                 `;
-                for (const [key, groupCount] of Object.entries(result.breakdown)) {
-                    dashboard.innerHTML += `
-                        <div class="card">
-                            <h3>${key}</h3>
-                            <div class="count">${groupCount}</div>
-                        </div>
-                    `;
-                }
-            })
-            .withFailureHandler(function(err) {
-                document.getElementById("loading-text").innerText = "Sync Error: " + err.message;
-            })
-            .getLiveDashboardData();
+            }
+        } catch (err) {
+            document.getElementById("loading-text").innerText = "Sync Error gamit ang URL: " + err.message;
+        }
     }
 
     window.addEventListener('DOMContentLoaded', function() {
@@ -257,3 +252,4 @@
 </script>
 </body>
 </html>
+
