@@ -219,6 +219,7 @@
     <!-- Modern Navigation Glass Frame -->
     <header>
         <div class="logo-container">
+            <!-- Nilagyan natin ng solid online fallback link para siguradong laging kita ang logo -->
             <img src="imerch.png" alt="iMerch Media Inc. Logo" onerror="this.src='https://ibb.co'">
         </div>
         <div class="header-widgets">
@@ -245,7 +246,7 @@
 </div>
 
 <script>
-    // Live Clock & Date Function (Inilabas para gumana agad kahit naglo-load pa ang Google Sheets)
+    // Live Clock & Date Function
     function updateLiveWidgets() {
         try {
             const now = new Date();
@@ -268,7 +269,7 @@
             document.getElementById('clock-display').innerText = timeString;
             document.getElementById('date-display').innerText = dateString;
         } catch(e) {
-            console.error("Clock widget parsing error: ", e);
+            console.error("Clock widget error: ", e);
         }
     }
     
@@ -276,7 +277,7 @@
     updateLiveWidgets();
     setInterval(updateLiveWidgets, 1000);
 
-    // Secure Data Extraction directly accessing Apps Script matrix
+    // Dito kinukuha ang data mula sa iyong Code.gs nang direkta at ligtas
     function loadGoogleSheetData() {
         try {
             google.script.run
@@ -312,13 +313,13 @@
                 .withFailureHandler(function(err) {
                     document.getElementById("loading-text").innerText = "Error: " + err.message;
                 })
-                .getLiveDashboardData(); // Tinatawag ang custom structure mula sa Code.gs
+                .getLiveDashboardData(); // Tinatawag ang function sa Code.gs
         } catch(err) {
-            document.getElementById("loading-text").innerText = "Hindi nagawang simulan ang Google Runtime endpoint interface.";
+            document.getElementById("loading-text").innerText = "Hindi nagawang ikonekta ang Google Script infrastructure.";
         }
     }
 
-    // Force engine integration initialization on DOM configuration ready state
+    // Siguraduhing unahang i-render ang ticking clock bago tawagin ang Google Sheet data
     window.addEventListener('DOMContentLoaded', function() {
         loadGoogleSheetData();
         // Awtomatikong magre-refresh kada 30 segundo nang walang interruption
