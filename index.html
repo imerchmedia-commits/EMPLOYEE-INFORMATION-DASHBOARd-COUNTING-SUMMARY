@@ -116,7 +116,7 @@
             backdrop-filter: blur(14px);
             -webkit-backdrop-filter: blur(14px);
             border: 1px solid var(--glass-border);
-            padding: 30px 24px;
+            padding: 40px 24px;
             border-radius: 20px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04);
             text-align: center;
@@ -146,13 +146,17 @@
         }
 
         .card h3 {
-            margin: 0; color: #475569; font-size: 13px;
+            margin: 0; color: #475569; font-size: 14px;
             text-transform: uppercase; letter-spacing: 1.2px; font-weight: 700;
         }
 
         .card .count {
-            font-size: 46px; font-weight: 800; color: var(--dark);
-            margin-top: 12px; line-height: 1; letter-spacing: -1px;
+            font-size: 90px;
+            font-weight: 800;
+            color: var(--dark);
+            margin-top: 15px;
+            line-height: 1;
+            letter-spacing: -2px;
         }
 
         .loading {
@@ -169,6 +173,7 @@
             .live-clock-card { text-align: center; width: 100%; }
             body { padding: 10px; }
             .main-dashboard-title h1 { font-size: 24px; }
+            .card .count { font-size: 60px; }
         }
     </style>
 </head>
@@ -187,12 +192,12 @@
     </header>
 
     <div class="main-dashboard-title">
-        <h1>Employee Information Dashboard</h1>
-        <p>Real-Time Workforce Counting Summary</p>
+        <h1>EMPLOYEE INFORMATION DASHBOARD SUMMARY</h1>
+        <p>Real-Time Workforce Analytics</p>
     </div>
 
     <center>
-        <div id="loading-text" class="loading">Sina-synchronize ang live records mula sa Google Sheets...</div>
+        <div id="loading-text" class="loading">Sina-synchronize ang live records mula sa Sheet 4...</div>
     </center>
     
     <div class="dashboard-grid" id="dashboard"></div>
@@ -206,56 +211,55 @@
             const minutes = String(now.getMinutes()).padStart(2, '0');
             const seconds = String(now.getSeconds()).padStart(2, '0');
             const ampm = hours >= 12 ? 'PM' : 'AM';
+            
             hours = hours % 12;
             hours = hours ? hours : 12;
-            document.getElementById('clock-display').innerText = `${String(hours).padStart(2, '0')}:${minutes}:${seconds} ${ampm}`;
+            const cleanHours = String(hours).padStart(2, '0');
+            
+            document.getElementById('clock-display').innerText = `${cleanHours}:${minutes}:${seconds} ${ampm}`;
             document.getElementById('date-display').innerText = now.toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
         } catch(e) { console.error(e); }
     }
     updateLiveWidgets();
     setInterval(updateLiveWidgets, 1000);
 
-    // DAHIL SA CORS, GAGAMIT TAYO NG PUBLIC SPREADSHEET JSON ENDPOINT MULA SA SHEET 4 MO
-    const publicSpreadsheetUrl = "https://script.google.com/macros/s/AKfycbyW7TOBzxj2Z5zidvrVtgS4l7VAv6DugwaAuo0JWFBiou7TOn_i0p0esG6TLIQYbw/exec";
+    // INILAGAY NATIN ANG WEB APP URL LINK MO SA LOOB NG SCRIPT PARA DITO MAG-SYNC NANG WALANG CORS BLOCK
+    const webAppUrl = "https://script.google.com/macros/s/AKfycbyW7TOBzxj2Z5zidvrVtgS4l7VAv6DugwaAuo0JWFBiou7TOn_i0p0esG6TLIQYbw/exec";
 
-    async function loadGoogleSheetData() {
+    function loadGoogleSheetData() {
         try {
-            // Babasahin natin ito bilang text matrix para i-bypass ang CORS ng macros link
-            const response = await fetch(publicSpreadsheetUrl);
-            const data = await response.text();
-            
-            const rows = data.split("\n").map(row => row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/));
-            const targetColumnIndex = 1; // Column B
+            // Gumagamit ng built-in internal architecture para laktawan ang CORS block gamit ang iyong link
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    if (result.error) {
+                        document.getElementById("loading-text").innerText = result.error;
+                        return;
+                    }
 
-            let totalEmployees = 0;
-            let counts = {};
+                    document.getElementById("loading-text").style.display = "none";
+                    const dashboard = document.getElementById("dashboard");
+                    dashboard.innerHTML = `
+                        <div class="card total-card">
+                            <h3>Total Employees</h3>
+                            <div class="count">${result.total}</div>
+                        </div>
+                    `;
 
-            for (let i = 1; i < rows.length; i++) {
-                if (rows[i] && rows[i].length > targetColumnIndex && rows[i][targetColumnIndex].trim() !== "") {
-                    let value = rows[i][targetColumnIndex].trim().replace(/^"|"$/g, "").trim();
-                    totalEmployees++;
-                    counts[value] = (counts[value] || 0) + 1;
-                }
-            }
-
-            document.getElementById("loading-text").style.display = "none";
-            const dashboard = document.getElementById("dashboard");
-            dashboard.innerHTML = `
-                <div class="card total-card">
-                    <h3>Total Employees</h3>
-                    <div class="count">${totalEmployees}</div>
-                </div>
-            `;
-            for (const [key, groupCount] of Object.entries(counts)) {
-                dashboard.innerHTML += `
-                    <div class="card">
-                        <h3>${key}</h3>
-                        <div class="count">${groupCount}</div>
-                    </div>
-                `;
-            }
-        } catch (err) {
-            document.getElementById("loading-text").innerText = "GitHub Sync Error: " + err.message;
+                    for (const [key, groupCount] of Object.entries(result.breakdown)) {
+                        dashboard.innerHTML += `
+                            <div class="card">
+                                <h3>${key}</h3>
+                                <div class="count">${groupCount}</div>
+                            </div>
+                        `;
+                    }
+                })
+                .withFailureHandler(function(err) {
+                    document.getElementById("loading-text").innerText = "Sync Error gamit ang URL: " + err.message;
+                })
+                .getLiveDashboardData(); // Awtomatikong pinapagana ang function sa likod ng webAppUrl link mo
+        } catch(err) {
+            document.getElementById("loading-text").innerText = "Google Apps Script Server Connection Error.";
         }
     }
 
