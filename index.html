@@ -179,6 +179,7 @@
 </head>
 <body>
 <div class="container">
+    <!-- Modern Navigation Glass Frame -->
     <header>
         <div class="logo-container">
             <img src="imerch.png" alt="iMerch Media Inc. Logo" onerror="this.src='https://ibb.co'">
@@ -193,7 +194,7 @@
 
     <div class="main-dashboard-title">
         <h1>EMPLOYEE INFORMATION DASHBOARD SUMMARY</h1>
-        <p>Real-Time Workforce Analytics Summary</p>
+        <p>Real-Time Workforce Counting Summary</p>
     </div>
 
     <center>
@@ -215,53 +216,53 @@
             hours = hours % 12;
             hours = hours ? hours : 12;
             const cleanHours = String(hours).padStart(2, '0');
+            const timeString = `${cleanHours}:${minutes}:${seconds} ${ampm}`;
             
-            document.getElementById('clock-display').innerText = `${cleanHours}:${minutes}:${seconds} ${ampm}`;
+            document.getElementById('clock-display').innerText = timeString;
             document.getElementById('date-display').innerText = now.toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
         } catch(e) { console.error(e); }
     }
     updateLiveWidgets();
     setInterval(updateLiveWidgets, 1000);
 
-    // DITO ANG IYONG KONTROLADONG WEB APP URL LINK NA NAKA-ENGRAVE SA CODE
+    // =========================================================================
+    // INILAGAY NATIN ANG IYONG OPISYAL NA WEB APP URL LINK DITO PARA MATRACK MO
+    // =========================================================================
     const MY_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzG7JCTs41LkjpZ8vI5NZQiIHFvsMmLfluJ0RoU4MaYXt4Qa_Fy2zlcsRrXwUsSdpc-/exec";
+    // =========================================================================
 
     function loadGoogleSheetData() {
-        // Direktang lumulusot sa cloud database nang walang CORS blocks o security delays
-        google.script.run
-            .withSuccessHandler(function(result) {
-                if (result.error) {
-                    document.getElementById("loading-text").innerText = result.error;
-                    return;
-                }
+        // Gumagamit ng internal safety channel base sa active token link mo
+        if (typeof google !== 'undefined' && google.script && google.script.run && MY_WEB_APP_URL !== "") {
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    if (result.error) {
+                        document.getElementById("loading-text").innerText = result.error;
+                        return;
+                    }
 
-                document.getElementById("loading-text").style.display = "none";
-                const dashboard = document.getElementById("dashboard");
-                dashboard.innerHTML = `
-                    <div class="card total-card">
-                        <h3>Total Employees</h3>
-                        <div class="count">${result.total}</div>
-                    </div>
-                `;
-
-                for (const [key, groupCount] of Object.entries(result.breakdown)) {
-                    dashboard.innerHTML += `
-                        <div class="card">
-                            <h3>${key}</h3>
-                            <div class="count">${groupCount}</div>
+                    document.getElementById("loading-text").style.display = "none";
+                    const dashboard = document.getElementById("dashboard");
+                    
+                    // Direct rendering ng iyong static 1596 live card value
+                    dashboard.innerHTML = `
+                        <div class="card total-card" style="margin: auto; max-width: 450px;">
+                            <h3>Total Employees</h3>
+                            <div class="count">${result.total}</div>
                         </div>
                     `;
-                }
-            })
-            .withFailureHandler(function(err) {
-                document.getElementById("loading-text").innerText = "Sync Error: " + err.message;
-            })
-            .getLiveDashboardData(); // Humihingi ng secure value sa Code.gs gamit ang back-tunnel link mo
+                })
+                .withFailureHandler(function(err) {
+                    document.getElementById("loading-text").innerText = "Sync Error: " + err.message;
+                })
+                .getLiveDashboardData();
+        } else {
+            setTimeout(loadGoogleSheetData, 1000);
+        }
     }
 
     window.addEventListener('DOMContentLoaded', function() {
         loadGoogleSheetData();
-        // Awtomatikong muling magre-refresh kada 30 segundo nang tuluy-tuloy
         setInterval(loadGoogleSheetData, 30000);
     });
 </script>
